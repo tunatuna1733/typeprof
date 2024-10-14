@@ -398,6 +398,8 @@ module TypeProf::Core
         SigTyVarNode.new(raw_decl, lenv)
       when RBS::Types::Optional
         SigTyOptionalNode.new(raw_decl, lenv)
+      when RBS::Types::ParamConst
+        SigTyParamConstNode.new(raw_decl, lenv)
       when RBS::Types::Literal
         SigTyLiteralNode.new(raw_decl, lenv)
       else

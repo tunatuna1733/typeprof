@@ -1,3 +1,5 @@
+$LOAD_PATH.unshift File.expand_path("../../../../rbs/lib", __FILE__)  # Load modified version of RBS
+
 require "rbs"
 require "prism"
 require_relative "core/util"

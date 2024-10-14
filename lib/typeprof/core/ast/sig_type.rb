@@ -549,6 +549,34 @@ module TypeProf::Core
       end
     end
 
+    class SigTyParamConstNode < SigTyNode
+      def initialize(raw_decl, lenv)
+        super(raw_decl, lenv)
+        @type = AST.create_rbs_type(raw_decl.type, lenv)
+      end
+
+      attr_reader :type
+      def subnodes = { type: }
+
+      def covariant_vertex0(genv, changes, vtx, subst)
+        @type.covariant_vertex0(genv, changes, vtx, subst)
+        changes.add_edge(genv, Source.new(genv.nil_type), vtx)
+      end
+
+      def contravariant_vertex0(genv, changes, vtx, subst)
+        @type.contravariant_vertex0(genv, changes, vtx, subst)
+        changes.add_edge(genv, Source.new(genv.nil_type), vtx)
+      end
+
+      def show
+        s = @type.show
+        if @type.is_a?(SigTyIntersectionNode) || @type.is_a?(SigTyUnionNode)
+          s = "(#{ s })"
+        end
+        "const " + s
+      end
+    end
+
     class SigTyLiteralNode < SigTyNode
       def initialize(raw_decl, lenv)
         super(raw_decl, lenv)
