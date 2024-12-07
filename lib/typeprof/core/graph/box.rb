@@ -143,7 +143,7 @@ module TypeProf::Core
 
       method_type.req_positionals.each_with_index do |ty, i|
         f_arg = ty.contravariant_vertex(genv, changes, param_map)
-        return false unless a_args.positionals[i].check_match(genv, changes, f_arg)
+        return false unless a_args.positionals[i].check_match(genv, changes, f_arg, i)
       end
       method_type.post_positionals.each_with_index do |ty, i|
         f_arg = ty.contravariant_vertex(genv, changes, param_map)

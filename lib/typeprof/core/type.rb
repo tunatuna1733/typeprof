@@ -69,6 +69,47 @@ module TypeProf::Core
       end
     end
 
+    class ParamConst < Type
+      #: (GlobalEnv, ModuleEntity) -> void
+      def initialize(genv, mod)
+        raise unless mod.is_a?(ModuleEntity)
+        @mod = mod
+      end
+
+      attr_reader :mod
+
+      def base_type(_)
+        self
+      end
+
+      def check_match(genv, changes, vtx)
+        vtx.each_type do |other_ty|
+          case other_ty
+          when Singleton
+            other_mod = other_ty.mod
+            if other_mod.module?
+              # TODO: implement
+            else
+              mod = @mod
+              while mod
+                return true if mod == other_mod
+                changes.add_depended_superclass(mod)
+                mod = mod.superclass
+              end
+            end
+          when Instance
+            base_ty = @mod.module? ? genv.mod_type : genv.cls_type
+            return true if base_ty.check_match(genv, changes, Source.new(other_ty))
+          end
+        end
+        return false
+      end
+
+      def show
+        "const #{ @mod.show_cpath }"
+      end
+    end
+
     class Instance < Type
       #: (GlobalEnv, ModuleEntity, ::Array[Vertex]) -> void
       def initialize(genv, mod, args)

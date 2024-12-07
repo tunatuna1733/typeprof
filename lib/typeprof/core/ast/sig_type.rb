@@ -559,13 +559,25 @@ module TypeProf::Core
       def subnodes = { type: }
 
       def covariant_vertex0(genv, changes, vtx, subst)
-        @type.covariant_vertex0(genv, changes, vtx, subst)
-        changes.add_edge(genv, Source.new(genv.nil_type), vtx)
+        # @type.covariant_vertex0(genv, changes, vtx, subst)
+        if @type.is_a?(SigTyInstanceNode)
+          mod = genv.resolve_cpath(@type.cpath)
+          # args = @args.map {|arg| arg.contravariant_vertex(genv, changes, subst) }
+          changes.add_edge(genv, Source.new(Type::ParamConst.new(genv, mod)), vtx)
+        else
+          changes.add_edge(genv, Source.new(genv.nil_type), vtx)
+        end
       end
 
       def contravariant_vertex0(genv, changes, vtx, subst)
-        @type.contravariant_vertex0(genv, changes, vtx, subst)
-        changes.add_edge(genv, Source.new(genv.nil_type), vtx)
+        # @type.contravariant_vertex0(genv, changes, vtx, subst)
+        if @type.is_a?(SigTyInstanceNode)
+          mod = genv.resolve_cpath(@type.cpath)
+          # args = @args.map {|arg| arg.contravariant_vertex(genv, changes, subst) }
+          changes.add_edge(genv, Source.new(Type::ParamConst.new(genv, mod)), vtx)
+        else
+          changes.add_edge(genv, Source.new(genv.nil_type), vtx)
+        end
       end
 
       def show

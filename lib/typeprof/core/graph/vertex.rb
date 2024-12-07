@@ -20,7 +20,7 @@ module TypeProf::Core
       end
     end
 
-    def check_match(genv, changes, vtx)
+    def check_match(genv, changes, vtx, *param_index)
       vtx.each_type do |ty|
         if ty.is_a?(Type::Var)
           changes.add_edge(genv, self, ty.vtx) if self != ty.vtx
@@ -30,6 +30,34 @@ module TypeProf::Core
 
       return true if @types.empty?
       return true if vtx.types.empty?
+
+      is_const = false
+      vtx.each_type do |ty|
+        if ty.is_a?(Type::ParamConst)
+          is_const = true
+        end
+      end
+
+      if is_const
+        if param_index.size < 1
+          return false
+        end
+        # if the arg is ~VariableReadNode, we need to check both const? and internal type which is the default implementation
+        # if the arg is literal ones, we only check internal type which can be done with mod access
+        each_type do |ty|
+          # just implemented positional_args as of now
+          arg = changes.node.positional_args[param_index[0]]
+          if !(arg.is_a?(AST::LocalVariableReadNode) ||
+            arg.is_a?(AST::InstanceVariableReadNode) ||
+            arg.is_a?(AST::GlobalVariableReadNode) ||
+            arg.is_a?(AST::ClassVariableReadNode)) ||
+            !changes.node.recv
+            vtx.types.each do |key, _|
+              return true if key.mod == ty.mod
+            end
+          end
+        end
+      end
 
       each_type do |ty|
         return true if vtx.types.include?(ty) # fast path
